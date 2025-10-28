@@ -263,6 +263,31 @@ function jm_sync_local_pickup_with_checkbox() {
     });
   }
 
+  function updateOtherMethodsVisibility(isPickup){
+    var $methods = $('input.shipping_method');
+    var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
+    if(isPickup){
+      if($other.length === 1){
+        $other.first().closest('li').hide();
+      } else {
+        $other.closest('li').show();
+      }
+    } else {
+      $other.closest('li').show();
+    }
+  }
+
+  function updateShippingTotalsVisibility(isPickup){
+    var $methods = $('input.shipping_method');
+    var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
+    var onlyOneOther = $other.length === 1;
+    if(isPickup && onlyOneOther){
+      $('.woocommerce-shipping-totals').hide();
+    } else {
+      $('.woocommerce-shipping-totals').show();
+    }
+  }
+
   function selectShippingByPickupFlag(isPickup){
     var $methods = $('input.shipping_method');
     if(!$methods.length){ return; }
@@ -285,6 +310,9 @@ function jm_sync_local_pickup_with_checkbox() {
   function syncFromCheckbox(){
     if(isSyncing){ return; }
     var isPickup = $('#shipping_is_local_pickup').is(':checked');
+    hideLocalPickupOptions();
+    updateOtherMethodsVisibility(isPickup);
+    updateShippingTotalsVisibility(isPickup);
     selectShippingByPickupFlag(isPickup);
   }
 
@@ -295,11 +323,17 @@ function jm_sync_local_pickup_with_checkbox() {
   $(document.body).on('updated_checkout updated_shipping_method', function(){
     isSyncing = false;
     hideLocalPickupOptions();
+    var isPickup = $('#shipping_is_local_pickup').is(':checked');
+    updateOtherMethodsVisibility(isPickup);
+    updateShippingTotalsVisibility(isPickup);
     syncFromCheckbox();
   });
 
   $(function(){
     hideLocalPickupOptions();
+    var isPickup = $('#shipping_is_local_pickup').is(':checked');
+    updateOtherMethodsVisibility(isPickup);
+    updateShippingTotalsVisibility(isPickup);
     syncFromCheckbox();
   });
 })(jQuery);

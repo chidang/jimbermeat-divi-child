@@ -11,6 +11,10 @@
  
 /* =Theme customization starts here*/
 
+.woocommerce-error a {
+	color: #fff;
+}
+
 @media (max-width: 981px){
 	#prtest .lmp_load_more_button.br_lmp_button_settings {
 		display: block !important;
