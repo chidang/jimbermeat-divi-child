@@ -239,3 +239,64 @@ function restrict_orders_by_zipcode_range() {
     }
 }*/
 
+if ( function_exists( 'add_action' ) ) {
+    call_user_func( 'add_action', 'wp_enqueue_scripts', 'jm_sync_local_pickup_with_checkbox' );
+}
+function jm_sync_local_pickup_with_checkbox() {
+    $in_checkout = function_exists( 'is_checkout' ) ? (bool) call_user_func( 'is_checkout' ) : false;
+    if ( $in_checkout ) {
+        if ( function_exists( 'wp_register_script' ) ) {
+            call_user_func( 'wp_register_script', 'jm-checkout-shipping-toggle', false, array( 'jquery', 'wc-checkout' ), '1.0.0', true );
+        }
+        if ( function_exists( 'wp_enqueue_script' ) ) {
+            call_user_func( 'wp_enqueue_script', 'jm-checkout-shipping-toggle' );
+        }
+        $script = <<<'JS'
+(function($){
+  var isSyncing = false;
+
+  function selectShippingByPickupFlag(isPickup){
+    var $methods = $('input.shipping_method');
+    if(!$methods.length){ return; }
+    var $local = $methods.filter(function(){ return this.value && this.value.indexOf('local_pickup') !== -1; });
+    var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
+
+    var $target = null;
+    if(isPickup){
+      $target = $local.length ? $local.first() : ($other.length ? $other.first() : null);
+    } else {
+      $target = $other.length ? $other.first() : ($local.length ? $local.first() : null);
+    }
+    if(!$target){ return; }
+    if($target.is(':checked')){ return; }
+
+    isSyncing = true;
+    $target.prop('checked', true).trigger('change');
+  }
+
+  function syncFromCheckbox(){
+    if(isSyncing){ return; }
+    var isPickup = $('#shipping_is_local_pickup').is(':checked');
+    selectShippingByPickupFlag(isPickup);
+  }
+
+  $(document).on('change', '#shipping_is_local_pickup', function(){
+    syncFromCheckbox();
+  });
+
+  $(document.body).on('updated_checkout updated_shipping_method', function(){
+    isSyncing = false;
+    syncFromCheckbox();
+  });
+
+  $(function(){
+    syncFromCheckbox();
+  });
+})(jQuery);
+JS;
+        if ( function_exists( 'wp_add_inline_script' ) ) {
+            call_user_func( 'wp_add_inline_script', 'jm-checkout-shipping-toggle', $script );
+        }
+    }
+}
+

@@ -49,10 +49,10 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 	<?php endif; ?>
 
-  <p class="form-row  thwcfd-field-wrapper thwcfd-field-checkbox" id="billing_is_local_pickup_field" data-priority="130">
+  <p class="form-row  thwcfd-field-wrapper thwcfd-field-checkbox" id="shipping_is_local_pickup_field" data-priority="130">
     <span class="woocommerce-input-wrapper">
       <label class="checkbox ">
-	<input type="checkbox" class="input-checkbox " name="billing_is_local_pickup" id="billing_is_local_pickup" value="1"> 
+	<input type="checkbox" class="input-checkbox " name="shipping_is_local_pickup" id="shipping_is_local_pickup" value="1"> 
   Ophalen op ons adres: Drukkersweg 14, 2031 EE Haarlem&nbsp;</label></span>
   <a href="https://www.google.com/maps/place/Drukkersweg+14,+2031+EE+Haarlem,+Netherlands/@52.3991484,4.6576888,340m/data=!3m1!1e3!4m15!1m8!3m7!1s0x47c5ef8040ed48b3:0x558491be95398e63!2sDrukkersweg+14,+2031+EE+Haarlem,+Netherlands!3b1!8m2!3d52.3989582!4d4.6594854!16s%2Fg%2F11q2ndfcr3!3m5!1s0x47c5ef8040ed48b3:0x558491be95398e63!8m2!3d52.3989582!4d4.6594854!16s%2Fg%2F11q2ndfcr3?entry=ttu&g_ep=EgoyMDI1MTAyMi4wIKXMDSoASAFQAw%3D%3D" target="_blank">Bekijk locatie op Google Maps</a>
 </p>
