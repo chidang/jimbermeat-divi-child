@@ -266,6 +266,13 @@ function jm_sync_local_pickup_with_checkbox() {
   function updateOtherMethodsVisibility(isPickup){
     var $methods = $('input.shipping_method');
     var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
+    if($other.length === 1){
+      $other.first().css({
+        'width': '1px',
+        'margin': '0',
+        'opacity': '0'
+      })
+    }
     if(isPickup){
       if($other.length === 1){
         $other.first().closest('li').hide();
