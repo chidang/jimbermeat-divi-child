@@ -255,6 +255,14 @@ function jm_sync_local_pickup_with_checkbox() {
 (function($){
   var isSyncing = false;
 
+  function hideLocalPickupOptions(){
+    $('input.shipping_method').filter(function(){
+      return this.value && this.value.indexOf('local_pickup') !== -1;
+    }).each(function(){
+      $(this).closest('li').hide();
+    });
+  }
+
   function selectShippingByPickupFlag(isPickup){
     var $methods = $('input.shipping_method');
     if(!$methods.length){ return; }
@@ -286,10 +294,12 @@ function jm_sync_local_pickup_with_checkbox() {
 
   $(document.body).on('updated_checkout updated_shipping_method', function(){
     isSyncing = false;
+    hideLocalPickupOptions();
     syncFromCheckbox();
   });
 
   $(function(){
+    hideLocalPickupOptions();
     syncFromCheckbox();
   });
 })(jQuery);
