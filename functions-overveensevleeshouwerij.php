@@ -1,7 +1,4 @@
 <?php
-define( 'LOCAL_PICKUP_GOOGLE_MAP_LINK', 'https://www.google.com/maps/place/Drukkersweg+14,+2031+EE+Haarlem,+Netherlands/@52.3991484,4.6576888,340m/data=!3m1!1e3!4m15!1m8!3m7!1s0x47c5ef8040ed48b3:0x558491be95398e63!2sDrukkersweg+14,+2031+EE+Haarlem,+Netherlands!3b1!8m2!3d52.3989582!4d4.6594854!16s%2Fg%2F11q2ndfcr3!3m5!1s0x47c5ef8040ed48b3:0x558491be95398e63!8m2!3d52.3989582!4d4.6594854!16s%2Fg%2F11q2ndfcr3?entry=ttu&g_ep=EgoyMDI1MTAyMi4wIKXMDSoASAFQAw%3D%3D' );
-define( 'LOCAL_PICKUP_ADDRESS', 'Burgemeester Hogguerstraat 861, 1064 EC.' );
-
 function my_theme_enqueue_styles() { 
     wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
 }
@@ -179,7 +176,6 @@ function hide_shipping_calculator_for_free_shipping( $show_shipping ) {
 add_action( 'woocommerce_email_before_order_table', 'add_custom_text_above_order_table', 10, 4 );
 
 function add_custom_text_above_order_table( $order, $sent_to_admin, $plain_text, $email ) {
-
     if ( ! $sent_to_admin && $email->id === 'customer_processing_order' ) {
         echo '<p style="margin-bottom:15px;">';
         echo 'Bedankt voor uw bestelling! Ons team gaat er meteen mee aan de slag om ervoor te zorgen dat u de kwaliteit ontvangt die u van ons gewend bent. Wij bereiden en leveren met zorg, zodat u uw bestelling zo snel mogelijk in huis heeft. Mocht u tijdens het proces vragen of speciale wensen hebben, dan horen wij dat graag. Samen zorgen we ervoor dat u tevreden bent met elke levering.';
@@ -187,7 +183,7 @@ function add_custom_text_above_order_table( $order, $sent_to_admin, $plain_text,
     }
 }
 
-/*add_action( 'woocommerce_checkout_process', 'restrict_orders_by_zipcode_range' );
+add_action( 'woocommerce_checkout_process', 'restrict_orders_by_zipcode_range' );
 
 function restrict_orders_by_zipcode_range() {
 	
@@ -240,117 +236,4 @@ function restrict_orders_by_zipcode_range() {
             break;
         }
     }
-}*/
-
-if ( function_exists( 'add_action' ) ) {
-    call_user_func( 'add_action', 'wp_enqueue_scripts', 'jm_sync_local_pickup_with_checkbox' );
 }
-function jm_sync_local_pickup_with_checkbox() {
-    $in_checkout = function_exists( 'is_checkout' ) ? (bool) call_user_func( 'is_checkout' ) : false;
-    if ( $in_checkout ) {
-        if ( function_exists( 'wp_register_script' ) ) {
-            call_user_func( 'wp_register_script', 'jm-checkout-shipping-toggle', false, array( 'jquery', 'wc-checkout' ), '1.0.0', true );
-        }
-        if ( function_exists( 'wp_enqueue_script' ) ) {
-            call_user_func( 'wp_enqueue_script', 'jm-checkout-shipping-toggle' );
-        }
-        $script = <<<'JS'
-(function($){
-  var isSyncing = false;
-
-  function hideLocalPickupOptions(){
-    $('input.shipping_method').filter(function(){
-      return this.value && this.value.indexOf('local_pickup') !== -1;
-    }).each(function(){
-      $(this).closest('li').hide();
-    });
-  }
-
-  function updateOtherMethodsVisibility(isPickup){
-    var $methods = $('input.shipping_method');
-    var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
-    if($other.length === 1){
-      $other.first().css({
-        'width': '1px',
-        'margin': '0',
-        'opacity': '0'
-      })
-    }
-    if(isPickup){
-      if($other.length === 1){
-        $other.first().closest('li').hide();
-      } else {
-        $other.closest('li').show();
-      }
-    } else {
-      $other.closest('li').show();
-    }
-  }
-
-  function updateShippingTotalsVisibility(isPickup){
-    var $methods = $('input.shipping_method');
-    var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
-    var onlyOneOther = $other.length === 1;
-    if(isPickup && onlyOneOther){
-      $('.woocommerce-shipping-totals').hide();
-    } else {
-      $('.woocommerce-shipping-totals').show();
-    }
-  }
-
-  function selectShippingByPickupFlag(isPickup){
-    var $methods = $('input.shipping_method');
-    if(!$methods.length){ return; }
-    var $local = $methods.filter(function(){ return this.value && this.value.indexOf('local_pickup') !== -1; });
-    var $other = $methods.filter(function(){ return !this.value || this.value.indexOf('local_pickup') === -1; });
-
-    var $target = null;
-    if(isPickup){
-      $target = $local.length ? $local.first() : ($other.length ? $other.first() : null);
-    } else {
-      $target = $other.length ? $other.first() : ($local.length ? $local.first() : null);
-    }
-    if(!$target){ return; }
-    if($target.is(':checked')){ return; }
-
-    isSyncing = true;
-    $target.prop('checked', true).trigger('change');
-  }
-
-  function syncFromCheckbox(){
-    if(isSyncing){ return; }
-    var isPickup = $('#shipping_is_local_pickup').is(':checked');
-    hideLocalPickupOptions();
-    updateOtherMethodsVisibility(isPickup);
-    updateShippingTotalsVisibility(isPickup);
-    selectShippingByPickupFlag(isPickup);
-  }
-
-  $(document).on('change', '#shipping_is_local_pickup', function(){
-    syncFromCheckbox();
-  });
-
-  $(document.body).on('updated_checkout updated_shipping_method', function(){
-    isSyncing = false;
-    hideLocalPickupOptions();
-    var isPickup = $('#shipping_is_local_pickup').is(':checked');
-    updateOtherMethodsVisibility(isPickup);
-    updateShippingTotalsVisibility(isPickup);
-    syncFromCheckbox();
-  });
-
-  $(function(){
-    hideLocalPickupOptions();
-    var isPickup = $('#shipping_is_local_pickup').is(':checked');
-    updateOtherMethodsVisibility(isPickup);
-    updateShippingTotalsVisibility(isPickup);
-    syncFromCheckbox();
-  });
-})(jQuery);
-JS;
-        if ( function_exists( 'wp_add_inline_script' ) ) {
-            call_user_func( 'wp_add_inline_script', 'jm-checkout-shipping-toggle', $script );
-        }
-    }
-}
-
