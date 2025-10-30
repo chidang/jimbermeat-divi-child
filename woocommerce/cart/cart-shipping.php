@@ -38,7 +38,19 @@ $calculator_text          = '';
 						} else {
 							printf( '<input type="hidden" name="shipping_method[%1$d]" data-index="%1$d" id="shipping_method_%1$d_%2$s" value="%3$s" class="shipping_method" />', $index, esc_attr( sanitize_title( $method->id ) ), esc_attr( $method->id ) ); // WPCS: XSS ok.
 						}
+
 						printf( '<label for="shipping_method_%1$s_%2$s">%3$s</label>', $index, esc_attr( sanitize_title( $method->id ) ), wc_cart_totals_shipping_method_label( $method ) ); // WPCS: XSS ok.
+
+						// Show extra text if this is the flat_rate shipping method
+						if ( strpos( $method->id, 'flat_rate' ) === 0 ) {
+							echo '<div class="shipping-flat-rate-address" style="margin-top: 6px; font-size:0.98em;">Verzenden naar <strong>' . esc_html( LOCAL_PICKUP_ADDRESS ) . '</strong></div>';
+						}
+
+						// If method is local_pickup, show the Google Maps link
+						if ( strpos( $method->id, 'local_pickup' ) === 0 ) {
+							echo '<div class="shipping-local-pickup-map" style="margin-top: 6px; font-size:0.98em;"><a href="' . esc_url( LOCAL_PICKUP_GOOGLE_MAP_LINK ) . '" target="_blank" rel="noopener">Bekijk locatie op Google Maps.</a></div>';
+						}
+
 						do_action( 'woocommerce_after_shipping_rate', $method, $index );
 						?>
 					</li>
